@@ -1,0 +1,447 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#19283f">
+<title>X BANK</title>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#001027;--nav:#1a2941;--card:#062544;--tile:#1b2a43;--green:#18c99c;--gold:#ffd65a;--muted:#aab5c6}
+body{margin:0;background:var(--bg);color:#f5f7fc;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:var(--nav);padding:20px 17px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+header strong{font-size:22px;letter-spacing:1.5px}
+header small{display:block;color:var(--muted);margin-top:4px}
+main{max-width:560px;margin:auto;padding:16px 14px 40px}
+h2{font-size:19px;margin:12px 0 18px}
+h3{font-size:16px;margin:0 0 14px}
+p{line-height:1.5}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.card{background:var(--nav);border-radius:19px;padding:19px;margin-bottom:17px}
+.balance-card{background:var(--card);padding:22px 19px;border-radius:0 0 26px 26px;margin:0 -14px 25px}
+.account-title{font-weight:700;font-size:16px;overflow-wrap:anywhere}
+.balance{font-size:39px;font-weight:800;margin:24px 0 8px;overflow-wrap:anywhere}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:13px 15px;font-weight:650}
+.primary{background:var(--green);color:#062b28}
+.secondary{background:#073650;color:white}
+.darkbtn{background:#293750;color:white}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:23px}
+.actions button{border-radius:28px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tile{background:var(--tile);min-height:105px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:10px 3px;color:white;font-size:13px}
+.tile .ico{font-size:25px;color:var(--gold)}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin:24px 0 13px}
+.section-head h3{margin:0}
+input,select{display:block;width:100%;background:#0c1729;border:1px solid #3a4962;color:white;padding:14px;border-radius:10px;margin:7px 0 15px;font:inherit}
+label{font-size:13px;color:#c3ccda}
+.full{width:100%}
+.link{background:none;color:var(--green);padding:8px 0}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tx{padding:15px 0;border-bottom:1px solid #354159;display:flex;justify-content:space-between;gap:10px}
+.tx:last-child{border:0}
+.green{color:var(--green)}
+.gold{color:var(--gold)}
+.hidden{display:none!important}
+#notice{margin:12px 0;font-size:13px;overflow-wrap:anywhere}
+#notice.ok{color:var(--green)}
+#notice.err{color:#ff9999}
+.receipt{background:#1c1c1c;padding:16px;margin:0 -14px;min-height:100vh}
+.rcard{background:#2b2b2b;border-radius:22px;padding:22px 17px;margin-bottom:16px}
+.rc-top{text-align:center;padding-top:28px}
+.rc-logo{width:64px;height:64px;margin:-48px auto 30px;border-radius:50%;background:#e7fff9;color:#111;display:grid;place-items:center;font-size:29px;border:5px solid #1c1c1c}
+.rc-amount{font-size:clamp(30px,8vw,47px);font-weight:800;margin:32px 0 15px;overflow-wrap:anywhere}
+.rc-status{color:var(--green);font-size:20px}
+.detail{display:flex;justify-content:space-between;gap:12px;margin:22px 0;align-items:flex-start;font-size:14px}
+.detail .label{color:#aaa;flex:0 0 40%}
+.detail .value{text-align:right;overflow-wrap:anywhere}
+.rc-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:30px}
+.rc-actions button{border-radius:40px}
+hr{border:0;border-top:1px dashed #555;margin:24px 0}
+footer{text-align:center;color:#8997ab;font-size:11px;margin:25px 0}
+@media(min-width:520px){.receipt{margin:0;padding:24px}.detail{font-size:16px}}
+</style>
+</head>
+<body>
+<header>
+  <div><strong>X BANK</strong><small>YOUR MONEY. YOUR CONTROL.</small></div>
+  <button id="logout" class="darkbtn hidden">Sign out</button>
+</header>
+<main>
+<div id="notice"></div>
+
+<section id="auth">
+  <div class="card">
+    <h2 id="authTitle">Create your X BANK account</h2>
+    <p class="muted small">X BANK is a fictional banking simulator. Balances and transfers are simulated and have no real monetary value.</p>
+    <form id="registerForm">
+      <label>First name</label><input id="first" required maxlength="60" autocomplete="given-name">
+      <label>Middle name (optional)</label><input id="middle" maxlength="60" autocomplete="additional-name">
+      <label>Surname</label><input id="surname" required maxlength="60" autocomplete="family-name">
+      <label>Email address</label><input id="email" type="email" required autocomplete="email">
+      <label>Choose your 10-digit account number</label>
+      <input id="newNumber" inputmode="numeric" maxlength="10" pattern="[0-9]{10}" placeholder="10 digits" required>
+      <label>Create password (at least 8 characters)</label>
+      <input id="newPassword" type="password" minlength="8" maxlength="128" required autocomplete="new-password">
+      <button class="primary full" type="submit">Create account</button>
+    </form>
+    <form id="loginForm" class="hidden">
+      <label>10-digit account number</label><input id="loginNumber" inputmode="numeric" maxlength="10" required>
+      <label>Password</label><input id="loginPassword" type="password" required autocomplete="current-password">
+      <button class="primary full" type="submit">Sign in</button>
+    </form>
+    <button id="switchAuth" class="link">Already have an account? Sign in</button>
+  </div>
+</section>
+
+<section id="dashboard" class="hidden">
+  <div class="balance-card">
+    <div class="row">
+      <div id="accountTitle" class="account-title"></div>
+      <button id="copyNumber" class="secondary" title="Copy account number">▢</button>
+    </div>
+    <div class="row" style="justify-content:flex-start;margin-top:22px;gap:12px">
+      <div id="balance" class="balance" style="margin:0">₦0.00</div>
+      <button id="toggleBalance" class="secondary">◉</button>
+    </div>
+    <p class="muted">Balance · Updated now</p>
+    <div class="actions">
+      <button id="addBtn" class="secondary">＋ Add Money</button>
+      <button id="historyBtn" class="secondary">◷ History</button>
+    </div>
+  </div>
+
+  <div class="section-head"><h3>Services</h3></div>
+  <div class="grid">
+    <button class="tile" data-page="transfer"><span class="ico">⇄</span>Transfer</button>
+    <button class="tile" data-page="savings"><span class="ico">▣</span>Savings</button>
+    <button class="tile" data-page="statement"><span class="ico">▤</span>Statement</button>
+    <button class="tile" data-page="more"><span class="ico">▦</span>More</button>
+  </div>
+
+  <div class="section-head"><h3>Rewards</h3></div>
+  <div class="grid">
+    <div class="card"><div class="ico">🪙</div><p class="muted">Cashback</p><strong>₦0.00</strong></div>
+    <div class="card"><div class="ico">📣</div><p class="muted">Referrals</p><strong>₦0.00</strong></div>
+  </div>
+
+  <div class="section-head"><h3>Recent transactions</h3><button id="viewAll" class="link">View All</button></div>
+  <div class="card" id="recent"><p class="muted">No transactions yet.</p></div>
+</section>
+
+<section id="page" class="hidden">
+  <div class="row"><button id="back" class="darkbtn">← Back</button><h2 id="pageTitle">X BANK</h2></div>
+  <div id="pageBody" class="card"></div>
+</section>
+
+<section id="receiptPage" class="hidden">
+  <div class="receipt">
+    <div class="rcard rc-top">
+      <div class="rc-logo">♧</div>
+      <div id="rcTitle" style="font-size:21px;font-weight:650">Transfer</div>
+      <div id="rcAmount" class="rc-amount">₦0.00</div>
+      <div class="rc-status">● Successful</div>
+    </div>
+    <div class="rcard">
+      <h2>Transaction Details</h2>
+      <div class="detail"><span class="label">Recipient Details</span><span id="rcRecipient" class="value"></span></div>
+      <div class="detail"><span class="label">Transaction No.</span><span id="rcRef" class="value"></span></div>
+      <div class="detail"><span class="label">Payment Method</span><span class="value">X BANK</span></div>
+      <div class="detail"><span class="label">Transaction Date</span><span id="rcDate" class="value"></span></div>
+      <p class="muted small">Simulated transaction — not proof of a real payment.</p>
+    </div>
+    <div class="rcard">
+      <h2>More Actions</h2>
+      <div class="detail"><span class="label">Category</span><span class="value">Transfer</span></div>
+      <hr>
+      <div class="row">
+        <button id="again" class="link">⇄ Transfer Again</button>
+        <button id="receiptHistory" class="link">◷ View Records</button>
+      </div>
+    </div>
+    <div class="rc-actions">
+      <button id="report" class="secondary">Report Issue</button>
+      <button id="share" class="primary">Share Receipt</button>
+    </div>
+    <footer>X BANK · SIMULATED BANKING</footer>
+    <button id="receiptBack" class="darkbtn full">Return to dashboard</button>
+  </div>
+</section>
+</main>
+
+<script>
+let token = "";
+let user = null;
+let currentReceipt = null;
+let showBalance = true;
+let loginMode = false;
+let previousPage = "dashboard";
+
+const $ = id => document.getElementById(id);
+const money = kobo => "₦" + (kobo / 100).toLocaleString("en-NG", {
+  minimumFractionDigits: 2, maximumFractionDigits: 2
+});
+
+function message(text, type = "err") {
+  $("notice").textContent = text;
+  $("notice").className = type;
+}
+function clearMessage() { message(""); }
+function hideSections() {
+  ["auth","dashboard","page","receiptPage"].forEach(id => $(id).classList.add("hidden"));
+}
+function show(id) {
+  hideSections();
+  $(id).classList.remove("hidden");
+  clearMessage();
+}
+async function api(url, options = {}) {
+  const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
+  if (token) headers.Authorization = "Bearer " + token;
+  const res = await fetch(url, { ...options, headers });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Request failed.");
+  return data;
+}
+function authHeaders() {
+  return { Authorization: "Bearer " + token };
+}
+function formatDate(value) {
+  return new Date(value).toLocaleString("en-NG", {
+    year:"numeric",month:"short",day:"numeric",
+    hour:"2-digit",minute:"2-digit",second:"2-digit"
+  });
+}
+function updateUser(next) {
+  user = next;
+  $("accountTitle").textContent =
+    user.accountNumber + " | " + user.name;
+  $("balance").textContent = showBalance ? money(user.balanceKobo) : "••••••";
+}
+function showAuth() {
+  show("auth");
+  $("logout").classList.add("hidden");
+  $("registerForm").classList.toggle("hidden", loginMode);
+  $("loginForm").classList.toggle("hidden", !loginMode);
+  $("authTitle").textContent = loginMode ? "Welcome back" : "Create your X BANK account";
+  $("switchAuth").textContent = loginMode
+    ? "New here? Create an account" : "Already have an account? Sign in";
+}
+async function refreshUser() {
+  const data = await api("/api/me");
+  updateUser(data.user);
+}
+async function loadTransactions() {
+  const data = await api("/api/transactions");
+  const host = $("recent");
+  host.innerHTML = "";
+  if (!data.transactions.length) {
+    host.innerHTML = '<p class="muted">No transactions yet.</p>';
+    return;
+  }
+  data.transactions.slice(0,5).forEach(tx => host.append(makeTransaction(tx)));
+}
+function makeTransaction(tx) {
+  const incoming = tx.toId === user.id;
+  const div = document.createElement("div");
+  div.className = "tx";
+  const left = document.createElement("div");
+  const title = document.createElement("strong");
+  title.textContent = incoming ? "Money received" :
+    tx.fromId === null ? "Balance credit" : "Transfer sent";
+  const date = document.createElement("div");
+  date.className = "muted small";
+  date.textContent = formatDate(tx.createdAt);
+  left.append(title, date);
+  const amount = document.createElement("strong");
+  amount.className = incoming ? "green" : "";
+  amount.textContent = (incoming ? "+" : "−") + money(tx.amountKobo);
+  div.append(left, amount);
+  div.tabIndex = 0;
+  div.style.cursor = "pointer";
+  div.onclick = () => openReceipt(tx);
+  return div;
+}
+async function dashboard() {
+  show("dashboard");
+  $("logout").classList.remove("hidden");
+  await refreshUser();
+  await loadTransactions();
+}
+async function openReceipt(tx) {
+  currentReceipt = tx;
+  show("receiptPage");
+  const isCredit = tx.toId === user.id;
+  $("rcTitle").textContent = isCredit
+    ? "Received from " + tx.fromName : "Transfer to " + tx.toName;
+  $("rcAmount").textContent = money(tx.amountKobo);
+  $("rcRecipient").textContent = tx.toName + "\nX BANK | " + tx.toNumber;
+  $("rcRef").textContent = tx.reference;
+  $("rcDate").textContent = formatDate(tx.createdAt);
+}
+function field(label, id, attrs = {}) {
+  const wrap = document.createElement("div");
+  const lab = document.createElement("label");
+  lab.textContent = label;
+  const input = document.createElement("input");
+  input.id = id;
+  input.required = true;
+  Object.entries(attrs).forEach(([key,value]) => input.setAttribute(key,value));
+  wrap.append(lab,input);
+  return wrap;
+}
+function button(text, handler) {
+  const b = document.createElement("button");
+  b.className = "primary full";
+  b.textContent = text;
+  b.onclick = handler;
+  return b;
+}
+function openPage(name) {
+  previousPage = "dashboard";
+  show("page");
+  const host = $("pageBody");
+  host.innerHTML = "";
+  const titles = {
+    transfer:"Transfer money",add:"Add Money",history:"Transaction History",
+    statement:"Account Statement",savings:"Savings",more:"More Services"
+  };
+  $("pageTitle").textContent = titles[name] || "X BANK";
+
+  if (name === "transfer") {
+    const number = field("Recipient 10-digit account number","recipientNumber",
+      {inputmode:"numeric",maxlength:"10",pattern:"[0-9]{10}"});
+    const lookup = document.createElement("button");
+    lookup.className = "secondary full";
+    lookup.textContent = "Find recipient";
+    const recipient = document.createElement("p");
+    recipient.className = "muted";
+    const amount = field("Amount in naira (₦)","transferAmount",
+      {type:"number",min:"0.01",step:"0.01",max:"1000000000000"});
+    const send = button("Continue to confirmation",async () => {
+      try {
+        if (!recipient.dataset.number) throw new Error("Find the recipient first.");
+        const value = Number($("transferAmount").value);
+        if (!Number.isFinite(value) || value <= 0) throw new Error("Enter a valid amount.");
+        if (!confirm("Send " + money(Math.round(value*100)) + " to " +
+          recipient.dataset.name + "?")) return;
+        const result = await api("/api/transfer",{method:"POST",body:JSON.stringify({
+          recipientNumber:recipient.dataset.number,amount:value
+        })});
+        updateUser(result.user);
+        await loadTransactions();
+        openReceipt(result.receipt);
+      } catch(e) { message(e.message); }
+    });
+    lookup.onclick = async () => {
+      try {
+        const n = $("recipientNumber").value;
+        const result = await api("/api/recipient/" + encodeURIComponent(n));
+        recipient.dataset.number = result.accountNumber;
+        recipient.dataset.name = result.name;
+        recipient.textContent = "Recipient: " + result.name + " · " + result.accountNumber;
+        recipient.className = "green";
+        clearMessage();
+      } catch(e) { recipient.dataset.number = ""; message(e.message); }
+    };
+    host.append(number,lookup,recipient,amount,send);
+  } else if (name === "add") {
+    const intro = document.createElement("p");
+    intro.textContent = "Enter your access key to credit your simulated balance.";
+    intro.className = "muted";
+    const code = field("Access key","accessCode",{inputmode:"numeric",maxlength:"5",pattern:"[0-9]{5}"});
+    const amount = document.createElement("p");
+    amount.className = "green";
+    amount.textContent = "Available credits: ₦500,000 · ₦1 million · ₦1 billion · ₦1 trillion";
+    const add = button("Confirm Add Money",async () => {
+      try {
+        const result = await api("/api/add-money",{method:"POST",
+          body:JSON.stringify({code:$("accessCode").value})});
+        updateUser(result.user);
+        await loadTransactions();
+        openReceipt(result.receipt);
+      } catch(e) { message(e.message); }
+    });
+    host.append(intro,code,amount,add);
+  } else if (name === "history" || name === "statement") {
+    const list = document.createElement("div");
+    host.append(list);
+    api("/api/transactions").then(data => {
+      list.innerHTML = "";
+      if (!data.transactions.length) list.textContent = "No records yet.";
+      data.transactions.forEach(tx => list.append(makeTransaction(tx)));
+    }).catch(e => message(e.message));
+  } else {
+    const p = document.createElement("p");
+    p.className = "muted";
+    p.textContent = name === "savings"
+      ? "Savings tools can be added in a future version."
+      : "Additional services will be added as X BANK develops.";
+    host.append(p);
+  }
+}
+$("switchAuth").onclick = () => { loginMode = !loginMode; showAuth(); };
+$("registerForm").onsubmit = async e => {
+  e.preventDefault();
+  try {
+    const result = await api("/api/register",{method:"POST",body:JSON.stringify({
+      firstName:$("first").value,middleName:$("middle").value,
+      surname:$("surname").value,email:$("email").value,
+      accountNumber:$("newNumber").value,password:$("newPassword").value
+    })});
+    token = result.token; user = result.user; await dashboard();
+  } catch(e) { message(e.message); }
+};
+$("loginForm").onsubmit = async e => {
+  e.preventDefault();
+  try {
+    const result = await api("/api/login",{method:"POST",body:JSON.stringify({
+      accountNumber:$("loginNumber").value,password:$("loginPassword").value
+    })});
+    token = result.token; user = result.user; await dashboard();
+  } catch(e) { message(e.message); }
+};
+$("logout").onclick = async () => {
+  try { await api("/api/logout",{method:"POST"}); } catch {}
+  token = ""; user = null; loginMode = true; showAuth();
+};
+$("addBtn").onclick = () => openPage("add");
+$("historyBtn").onclick = () => openPage("history");
+$("viewAll").onclick = () => openPage("history");
+document.querySelectorAll("[data-page]").forEach(el =>
+  el.onclick = () => openPage(el.dataset.page));
+$("back").onclick = dashboard;
+$("toggleBalance").onclick = () => {
+  showBalance = !showBalance;
+  $("balance").textContent = showBalance ? money(user.balanceKobo) : "••••••";
+};
+$("copyNumber").onclick = async () => {
+  try { await navigator.clipboard.writeText(user.accountNumber); message("Account number copied.","ok"); }
+  catch { message("Account number: " + user.accountNumber,"ok"); }
+};
+$("again").onclick = () => openPage("transfer");
+$("receiptHistory").onclick = () => openPage("history");
+$("receiptBack").onclick = dashboard;
+$("share").onclick = async () => {
+  if (!currentReceipt) return;
+  const tx = currentReceipt;
+  const text = [
+    "X BANK — SIMULATED RECEIPT",
+    "This is not a real bank payment.",
+    "Amount: " + money(tx.amountKobo),
+    "Recipient: " + tx.toName,
+    "Account: " + tx.toNumber,
+    "Reference: " + tx.reference,
+    "Date: " + formatDate(tx.createdAt)
+  ].join("\n");
+  try {
+    if (navigator.share) await navigator.share({title:"X BANK Receipt",text});
+    else { await navigator.clipboard.writeText(text); message("Receipt text copied.","ok"); }
+  } catch {}
+};
+$("report").onclick = () => message("This is a simulated receipt. No real payment was made.","ok");
+showAuth();
+</script>
+</body>
+</html>
